@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application de Géolocalisation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>/Users/mac/Sites/Pratique.io
+        /* Style global de la page */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        /* Conteneur principal */
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 500px;
+        }
+
+        /* Titre de la page */
+        h1 {
+            font-size: 32px;
+            color: #4facfe;
+            margin-bottom: 20px;
+        }
+
+        /* Boutons */
+        button, a {
+            background-color: #4facfe;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 20px;
+        }
+
+        button:hover, a:hover {
+            background-color: #00f2fe;
+            transform: scale(1.05);
+        }
+
+        button:active, a:active {
+            transform: scale(0.95);
+        }
+
+        /* Section des informations */
+        #status, #coordinates, #address {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Carte */
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        /* Transition pour rendre la page plus fluide */
+        .container {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Application de Géolocalisation</h1>
+    <button onclick="getLocation()">Obtenir ma position</button>
+    <p id="status"></p>
+    <p id="coordinates"></p>
+    <p id="address"></p>
+
+    <!-- Div pour afficher la carte -->
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            document.getElementById("status").innerText = "Obtention de la position...";
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("La géolocalisation n'est pas prise en charge par ce navigateur.");
+        }
+    }
+
+    function showPosition(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Afficher les coordonnées
+        document.getElementById("coordinates").innerText = `Latitude: ${latitude}, Longitude: ${longitude}`;
+
+        // Afficher la carte
+        document.getElementById("map").style.display = "block";
+        var map = L.map('map').setView([latitude, longitude], 13);  // Centrer la carte sur la position de l'utilisateur
+
+        // Ajouter la couche de tuiles OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Ajouter un marqueur sur la position
+        L.marker([latitude, longitude]).addTo(map)
+            .bindPopup("Vous êtes ici!")
+            .openPopup();
+
+        // Obtenir l'adresse via l'API Nominatim
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+            .then(response => response.json())
+            .then(data => {
+                const address = data.display_name || "Adresse introuvable";
+                document.getElementById("address").innerText = `Adresse: ${address}`;
+            })
+            .catch(error => console.error("Erreur avec Nominatim:", error));
+    }
+
+    function showError(error) {
+        let message = "";
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                message = "L'utilisateur a refusé la demande de géolocalisation.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                message = "Les informations de localisation ne sont pas disponibles.";
+                break;
+            case error.TIMEOUT:
+                message = "La demande de localisation a expiré.";
+                break;
+            case error.UNKNOWN_ERROR:
+                message = "Une erreur inconnue s'est produite.";
+                break;
+        }
+        document.getElementById("status").innerText = message;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="24ab8a13-78d5-48e5-a8be-18e35527d155" name="Application de Géolocalisation" url="http://ftp.monsite.com ">
+        <fileTransfer rootFolder="/public_html" host="ftp.monsite.com " port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
